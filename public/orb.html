@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 80px;
+      height: 80px;
+      overflow: hidden;
+    }
+    .orb-box {
+      position: relative;
+      width: 70px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .orb {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 50%, #00f0ff 0%, #005f73 60%, #03080e 100%);
+      border: 2px solid #00f0ff;
+      box-shadow: 0 0 15px #00f0ff, inset 0 0 10px #00f0ff;
+      transition: all 0.3s ease;
+    }
+    .orb::after {
+      content: '';
+      position: absolute;
+      top: -4px; left: -4px; right: -4px; bottom: -4px;
+      border-radius: 50%;
+      border: 1.5px dashed #00f0ff;
+      animation: rotate 10s linear infinite;
+    }
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    /* Estado de Leitura/Análise */
+    .orb-box.analyzing .orb {
+      background: radial-gradient(circle at 50% 50%, #ff0055 0%, #7a0026 60%, #03080e 100%);
+      border-color: #ff0055;
+      box-shadow: 0 0 25px #ff0055, inset 0 0 15px #ff0055;
+      animation: pulse 0.8s infinite alternate ease-in-out;
+    }
+    .orb-box.analyzing .orb::after { border-color: #ff0055; }
+    @keyframes pulse {
+      0% { transform: scale(0.95); }
+      100% { transform: scale(1.1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb-box" id="orbBox">
+    <div class="orb"></div>
+  </div>
+  <script>
+    const orbBox = document.getElementById('orbBox');
+    
+    // Comunicação com o Android Nativo
+    function setStatus(state) {
+      if (state === 'analyzing') {
+        orbBox.classList.add('analyzing');
+      } else {
+        orbBox.classList.remove('analyzing');
+      }
+    }
+  </script>
+</body>
+</html>

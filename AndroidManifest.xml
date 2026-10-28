@@ -1,0 +1,13 @@
+<!-- Permissões necessárias -->
+<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+
+<application ...>
+    <!-- Declaração do Serviço do Orb Flutuante -->
+    <service 
+        android:name="com.gigu.app.GigUOverlayService"
+        android:enabled="true"
+        android:exported="false"
+        android:foregroundServiceType="mediaProjection" />
+</application>

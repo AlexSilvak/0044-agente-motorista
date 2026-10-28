@@ -3,6 +3,30 @@ import { DEFAULT_SETTINGS, calculateOffer, costPerKm, parseOffer, settingsWarnin
 import { recognizeImage } from "./ocr.js";
 import { calculateCounterOffer } from "./engine.js";
 
+
+// Dentro do App.jsx
+import { toggleGigUOverlay } from "./services/overlay.js";
+
+// Adicionar um estado para o modo flutuante
+const [overlayActive, setOverlayActive] = useState(false);
+
+const handleToggleOverlay = async () => {
+  const newState = !overlayActive;
+  const success = await toggleGigUOverlay(newState);
+  if (success) {
+    setOverlayActive(newState);
+  }
+};
+
+
+
+
+
+
+
+
+
+
 const EXAMPLE_TEXT = "5 min\n2 km\n9 min\n5,2 km\nR$ 1,9/km ~2 km\nR$ 14\nAceitar por R$ 14\nSugira sua tarifa\nR$ 15,50 R$ 17 R$ 18,50";
 
 const SETTINGS_KEY = "gigu.settings.v2";
@@ -146,6 +170,14 @@ export default function App() {
         <h1>GigU</h1>
         <p>Copiloto para motoristas de app</p>
       </header>
+        // No JSX do App:
+<button 
+  type="button" 
+  className={`btn-overlay ${overlayActive ? 'active' : ''}`}
+  onClick={handleToggleOverlay}
+>
+  {overlayActive ? "🛑 Desativar Orb Flutuante" : "🔮 Ativar Orb Flutuante no inDrive"}
+</button>
 
       {warnings.length > 0 && (
         <div className="warn">
