@@ -1,4 +1,4 @@
-package com.gigu.app;
+package com.alexsilvak.gigu;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -43,8 +43,7 @@ public class GigUOverlayService extends Service {
                 220, 220,
                 layoutFlag,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT
-        );
+                PixelFormat.TRANSLUCENT);
 
         params.gravity = Gravity.TOP | Gravity.START;
         params.x = 100;
@@ -108,8 +107,7 @@ public class GigUOverlayService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID, "GigU Copiloto Ativo",
-                    NotificationManager.IMPORTANCE_LOW
-            );
+                    NotificationManager.IMPORTANCE_LOW);
             getSystemService(NotificationManager.class).createNotificationChannel(channel);
         }
 

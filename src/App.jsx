@@ -2,30 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { DEFAULT_SETTINGS, calculateOffer, costPerKm, parseOffer, settingsWarnings } from "./engine.js";
 import { recognizeImage } from "./ocr.js";
 import { calculateCounterOffer } from "./engine.js";
-
-
-// Dentro do App.jsx
 import { toggleGigUOverlay } from "./services/overlay.js";
-
-// Adicionar um estado para o modo flutuante
-const [overlayActive, setOverlayActive] = useState(false);
-
-const handleToggleOverlay = async () => {
-  const newState = !overlayActive;
-  const success = await toggleGigUOverlay(newState);
-  if (success) {
-    setOverlayActive(newState);
-  }
-};
-
-
-
-
-
-
-
-
-
 
 const EXAMPLE_TEXT = "5 min\n2 km\n9 min\n5,2 km\nR$ 1,9/km ~2 km\nR$ 14\nAceitar por R$ 14\nSugira sua tarifa\nR$ 15,50 R$ 17 R$ 18,50";
 
@@ -121,6 +98,7 @@ export default function App() {
   const [parseNote, setParseNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [overlayActive, setOverlayActive] = useState(false);
 
   useEffect(() => {
     try {
@@ -133,9 +111,15 @@ export default function App() {
   const result = useMemo(() => calculateOffer(offer, settings), [offer, settings]);
   const costs = useMemo(() => costPerKm(settings), [settings]);
   const warnings = useMemo(() => settingsWarnings(settings), [settings]);
-  
-  // CORREÇÃO: Variável counter movida para dentro do componente App
   const counter = useMemo(() => calculateCounterOffer(offer, settings), [offer, settings]);
+
+  const handleToggleOverlay = async () => {
+    const newState = !overlayActive;
+    const success = await toggleGigUOverlay(newState);
+    if (success) {
+      setOverlayActive(newState);
+    }
+  };
 
   function applyText(text) {
     const { offer: parsed, missing, notes } = parseOffer(text);
@@ -170,14 +154,14 @@ export default function App() {
         <h1>GigU</h1>
         <p>Copiloto para motoristas de app</p>
       </header>
-        // No JSX do App:
-<button 
-  type="button" 
-  className={`btn-overlay ${overlayActive ? 'active' : ''}`}
-  onClick={handleToggleOverlay}
->
-  {overlayActive ? "🛑 Desativar Orb Flutuante" : "🔮 Ativar Orb Flutuante no inDrive"}
-</button>
+
+      <button 
+        type="button" 
+        className={`btn-overlay ${overlayActive ? 'active' : ''}`}
+        onClick={handleToggleOverlay}
+      >
+        {overlayActive ? "🛑 Desativar Orb Flutuante" : "🔮 Ativar Orb Flutuante no inDrive"}
+      </button>
 
       {warnings.length > 0 && (
         <div className="warn">
@@ -223,35 +207,34 @@ export default function App() {
         </section>
 
         <section className="card result">
-  <h2>Análise Instantânea da Corrida</h2>
-  {result ? (
-    <>
-      <div className={`verdict ${VERDICT[result.verdict].cls}`}>
-        {VERDICT[result.verdict].label}
-      </div>
-      <div className="big">{brl(result.net)}</div>
-      <p className="muted">lucro real estimado na corrida</p>
+          <h2>Análise Instantânea da Corrida</h2>
+          {result ? (
+            <>
+              <div className={`verdict ${VERDICT[result.verdict].cls}`}>
+                {VERDICT[result.verdict].label}
+              </div>
+              <div className="big">{brl(result.net)}</div>
+              <p className="muted">lucro real estimado na corrida</p>
 
-      {/* Dica de Contraproposta Inteligente */}
-      {result.verdict !== "good" && counter && (
-        <div className="warn" style={{ marginTop: '12px', background: '#1c2636', borderColor: '#4f8cff', color: '#4f8cff' }}>
-          <strong>💡 Sugestão de Contraproposta no inDrive:</strong>
-          <p style={{ margin: '4px 0 0', fontSize: '15px', fontWeight: 'bold' }}>
-            Peça pelo menos <strong>{brl(counter.precoIdeal)}</strong> para atingir sua meta de lucro.
-          </p>
-        </div>
-      )}
+              {result.verdict !== "good" && counter && (
+                <div className="warn" style={{ marginTop: '12px', background: '#1c2636', borderColor: '#4f8cff', color: '#4f8cff' }}>
+                  <strong>💡 Sugestão de Contraproposta no inDrive:</strong>
+                  <p style={{ margin: '4px 0 0', fontSize: '15px', fontWeight: 'bold' }}>
+                    Peça pelo menos <strong>{brl(counter.precoIdeal)}</strong> para atingir sua meta de lucro.
+                  </p>
+                </div>
+              )}
 
-      <dl>
-        <div><dt>Lucro por km</dt><dd>{brl(result.perKm)}</dd></div>
-        <div><dt>Lucro por hora</dt><dd>{brl(result.perHour)}</dd></div>
-        <div><dt>Distância total (com vazio)</dt><dd>{one(result.effKm)} km</dd></div>
-      </dl>
-    </>
-  ) : (
-    <p className="muted">Aguardando captura ou leitura da oferta do inDrive...</p>
-  )}
-</section>
+              <dl>
+                <div><dt>Lucro por km</dt><dd>{brl(result.perKm)}</dd></div>
+                <div><dt>Lucro por hora</dt><dd>{brl(result.perHour)}</dd></div>
+                <div><dt>Distância total (com vazio)</dt><dd>{one(result.effKm)} km</dd></div>
+              </dl>
+            </>
+          ) : (
+            <p className="muted">Aguardando captura ou leitura da oferta do inDrive...</p>
+          )}
+        </section>
 
         <section className="card">
           <h2>Seus custos e metas</h2>

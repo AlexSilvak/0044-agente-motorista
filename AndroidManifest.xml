@@ -6,7 +6,7 @@
 <application ...>
     <!-- Declaração do Serviço do Orb Flutuante -->
     <service 
-        android:name="com.gigu.app.GigUOverlayService"
+        android:name="com.alexsilvak.gigu.GigUOverlayService"
         android:enabled="true"
         android:exported="false"
         android:foregroundServiceType="mediaProjection" />

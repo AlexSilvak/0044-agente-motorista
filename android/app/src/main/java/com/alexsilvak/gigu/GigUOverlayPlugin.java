@@ -1,4 +1,4 @@
-package com.gigu.app;
+package com.alexsilvak.gigu;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -29,8 +29,7 @@ public class GigUOverlayPlugin extends Plugin {
             if (!Settings.canDrawOverlays(getContext())) {
                 Intent intent = new Intent(
                         Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:" + getContext().getPackageName())
-                );
+                        Uri.parse("package:" + getContext().getPackageName()));
                 getActivity().startActivity(intent);
             }
         }

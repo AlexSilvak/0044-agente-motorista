@@ -1,4 +1,4 @@
-package com.gigu.app;
+package com.alexsilvak.gigu;
 
 import android.os.Bundle;
 import com.getcapacitor.BridgeActivity;
