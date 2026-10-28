@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">0044AgenteMotorista</string>
-    <string name="title_activity_main">0044AgenteMotorista</string>
-    <string name="package_name">com.example.agentemotorista</string>
-    <string name="custom_url_scheme">com.example.agentemotorista</string>
+    <string name="app_name">GigU Copiloto</string>
+    <string name="title_activity_main">GigU Copiloto</string>
+    <string name="package_name">com.alexsilvak.gigu</string>
+    <string name="custom_url_scheme">com.alexsilvak.gigu</string>
 </resources>

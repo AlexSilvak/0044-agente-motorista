@@ -140,8 +140,8 @@ export default function App() {
   return (
     <main className="app">
       <header>
-        <h1>0044</h1>
-        <p>Agente Motorista</p>
+        <h1>GigU</h1>
+        <p>Copiloto para motoristas de app</p>
       </header>
 
       {warnings.length > 0 && (
