@@ -21,7 +21,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps   # <-- Alterado aqui para ignorar conflitos de peer dependencies
+        run: npm install --legacy-peer-deps
 
       - name: Build web assets
         run: npm run build
