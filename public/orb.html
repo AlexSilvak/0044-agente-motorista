@@ -73,6 +73,13 @@
         orbBox.classList.remove('analyzing');
       }
     }
+    function setResult(data) {
+    // data = { valor: 18.50, km: 5.40, min: 12, valKm: 3.42, valHora: 92.50 }
+    console.log("Ganho por KM: R$ " + data.valKm.toFixed(2));
+    
+    // Atualize o elemento do Orb na interface
+    document.getElementById("orb-status").innerText = "R$ " + data.valKm.toFixed(2) + "/km";
+}
   </script>
 </body>
 </html>
