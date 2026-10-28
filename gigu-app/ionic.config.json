@@ -1,7 +1,0 @@
-{
-  "name": "0044-agente-motorista",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "react-vite"
-}

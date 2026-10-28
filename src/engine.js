@@ -11,6 +11,42 @@
 // Duas medidas de lucro:
 //   netCash = oferta - taxa - imposto - custos variáveis (combustível + manutenção)
 //   net     = netCash - parte dos custos fixos (depreciação, seguro/IPVA, parcela)   <- lucro real
+// Adicionado ao engine.js para calcular a tarifa ideal de contraproposta
+export function calculateCounterOffer(offer, settings = DEFAULT_SETTINGS) {
+  const s = { ...DEFAULT_SETTINGS, ...settings };
+  const pickupKm = num(offer.pickupKm);
+  const tripKm = num(offer.tripKm);
+  const totalKm = pickupKm + tripKm;
+  if (totalKm <= 0) return null;
+
+  const speed = s.avgSpeedKmh > 0 ? s.avgSpeedKmh : 25;
+  const pickupMin = num(offer.pickupMin) || (pickupKm / speed) * 60;
+  const tripMin = num(offer.tripMin) || (tripKm / speed) * 60;
+  const totalMin = Math.max(pickupMin + tripMin, 1);
+  const effKm = totalKm * (1 + num(s.idleKmPct) / 100);
+
+  // Custos totais da corrida (variáveis + cota fixa)
+  const c = costPerKm(s);
+  const custoTotalCorrida = effKm * c.total;
+
+  // Meta de lucro desejada
+  const lucroPorKmDesejado = num(s.minPerKm) * effKm;
+  const lucroPorHoraDesejado = (num(s.minPerHour) * (totalMin / 60));
+  const lucroDesejado = Math.max(lucroPorKmDesejado, lucroPorHoraDesejado);
+
+  let tarifaIdeal = custoTotalCorrida + lucroDesejado;
+  const feePct = num(s.platformFeePct) / 100;
+  if (feePct < 1) {
+    tarifaIdeal = tarifaIdeal / (1 - feePct);
+  }
+
+  const precoMinimoZeroPrejuizo = custoTotalCorrida / (1 - feePct);
+
+  return {
+    precoMinimo: Math.ceil(precoMinimoZeroPrejuizo * 2) / 2,
+    precoIdeal: Math.ceil(tarifaIdeal * 2) / 2
+  };
+}
 
 export const DEFAULT_SETTINGS = {
   // Seu carro (valores iniciais são exemplos: preencha com os do seu carro)

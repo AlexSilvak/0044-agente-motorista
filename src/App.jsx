@@ -1,6 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { DEFAULT_SETTINGS, calculateOffer, costPerKm, parseOffer, settingsWarnings } from "./engine.js";
 import { recognizeImage } from "./ocr.js";
+// Trecho de exibição do resultado otimizado no App.jsx
+import { calculateCounterOffer } from "./engine.js";
+
+// Dentro do componente App, onde exibe o resultado:
+const counter = useMemo(() => calculateCounterOffer(offer, settings), [offer, settings]);
 
 const EXAMPLE_TEXT = "5 min\n2 km\n9 min\n5,2 km\nR$ 1,9/km ~2 km\nR$ 14\nAceitar por R$ 14\nSugira sua tarifa\nR$ 15,50 R$ 17 R$ 18,50";
 
@@ -188,32 +193,35 @@ export default function App() {
         </section>
 
         <section className="card result">
-          <h2>Resultado</h2>
-          {result ? (
-            <>
-              <div className={`verdict ${VERDICT[result.verdict].cls}`}>{VERDICT[result.verdict].label}</div>
-              <div className="big">{brl(result.net)}</div>
-              <p className="muted">lucro real, depois de todos os custos</p>
-              <dl>
-                <div><dt>Lucro de caixa (sem custos fixos)</dt><dd>{brl(result.netCash)}</dd></div>
-                <div><dt>Lucro real por km</dt><dd>{brl(result.perKm)}</dd></div>
-                <div><dt>Lucro real por hora</dt><dd>{brl(result.perHour)}</dd></div>
-                <div><dt>Km considerados</dt><dd>{one(result.effKm)} km</dd></div>
-                <div>
-                  <dt>{offer.pickupMin && offer.tripMin ? "Tempo considerado" : "Tempo considerado (estimado pela velocidade média)"}</dt>
-                  <dd>{one(result.effMin)} min</dd>
-                </div>
-                <div><dt>Combustível</dt><dd>- {brl(result.fuelCost)}</dd></div>
-                <div><dt>Manutenção</dt><dd>- {brl(result.maintenance)}</dd></div>
-                <div><dt>Custos fixos (carro, seguro, parcela)</dt><dd>- {brl(result.fixedShare)}</dd></div>
-                {result.fee > 0 && <div><dt>Taxa da plataforma</dt><dd>- {brl(result.fee)}</dd></div>}
-                {result.taxReserve > 0 && <div><dt>Reserva de imposto</dt><dd>- {brl(result.taxReserve)}</dd></div>}
-              </dl>
-            </>
-          ) : (
-            <p className="muted">Informe o valor e as distâncias para calcular.</p>
-          )}
-        </section>
+  <h2>Análise Instantânea da Corrida</h2>
+  {result ? (
+    <>
+      <div className={`verdict ${VERDICT[result.verdict].cls}`}>
+        {VERDICT[result.verdict].label}
+      </div>
+      <div className="big">{brl(result.net)}</div>
+      <p className="muted">lucro real estimado na corrida</p>
+
+      {/* Dica de Contraproposta Inteligente */}
+      {result.verdict !== "good" && counter && (
+        <div className="warn" style={{ marginTop: '12px', background: '#1c2636', borderColor: '#4f8cff', color: '#4f8cff' }}>
+          <strong>💡 Sugestão de Contraproposta no inDrive:</strong>
+          <p style={{ margin: '4px 0 0', fontSize: '15px', fontWeight: 'bold' }}>
+            Peça pelo menos <strong>{brl(counter.precoIdeal)}</strong> para atingir sua meta de lucro.
+          </p>
+        </div>
+      )}
+
+      <dl>
+        <div><dt>Lucro por km</dt><dd>{brl(result.perKm)}</dd></div>
+        <div><dt>Lucro por hora</dt><dd>{brl(result.perHour)}</dd></div>
+        <div><dt>Distância total (com vazio)</dt><dd>{one(result.effKm)} km</dd></div>
+      </dl>
+    </>
+  ) : (
+    <p className="muted">Aguardando captura ou leitura da oferta do inDrive...</p>
+  )}
+</section>
 
         <section className="card">
           <h2>Seus custos e metas</h2>
