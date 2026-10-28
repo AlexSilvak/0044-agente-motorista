@@ -1,11 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { DEFAULT_SETTINGS, calculateOffer, costPerKm, parseOffer, settingsWarnings } from "./engine.js";
 import { recognizeImage } from "./ocr.js";
-// Trecho de exibição do resultado otimizado no App.jsx
 import { calculateCounterOffer } from "./engine.js";
-
-// Dentro do componente App, onde exibe o resultado:
-const counter = useMemo(() => calculateCounterOffer(offer, settings), [offer, settings]);
 
 const EXAMPLE_TEXT = "5 min\n2 km\n9 min\n5,2 km\nR$ 1,9/km ~2 km\nR$ 14\nAceitar por R$ 14\nSugira sua tarifa\nR$ 15,50 R$ 17 R$ 18,50";
 
@@ -23,7 +19,6 @@ function loadSettings() {
 const brl = (n) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const one = (n) => n.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
 
-// [chave, rótulo, passo, dica opcional]
 const SETTING_GROUPS = [
   {
     title: "Seu carro",
@@ -114,6 +109,9 @@ export default function App() {
   const result = useMemo(() => calculateOffer(offer, settings), [offer, settings]);
   const costs = useMemo(() => costPerKm(settings), [settings]);
   const warnings = useMemo(() => settingsWarnings(settings), [settings]);
+  
+  // CORREÇÃO: Variável counter movida para dentro do componente App
+  const counter = useMemo(() => calculateCounterOffer(offer, settings), [offer, settings]);
 
   function applyText(text) {
     const { offer: parsed, missing, notes } = parseOffer(text);
