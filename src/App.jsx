@@ -2,7 +2,39 @@ import React, { useEffect, useMemo, useState } from "react";
 import { DEFAULT_SETTINGS, calculateOffer, costPerKm, parseOffer, settingsWarnings } from "./engine.js";
 import { recognizeImage } from "./ocr.js";
 import { calculateCounterOffer } from "./engine.js";
-import { toggleGigUOverlay } from "./services/overlay.js";
+
+
+import { Capacitor, registerPlugin } from '@capacitor/core';
+
+// Regista o plugin nativo Android
+const GigUPlugin = registerPlugin('GigUPlugin');
+
+// Dentro do componente App:
+const handleToggleOverlay = async () => {
+  // Se estiver a rodar no navegador (localhost), avisa o utilizador e interrompe
+  if (!Capacitor.isNativePlatform()) {
+    alert('O Orb Flutuante é uma funcionalidade nativa e só funciona quando executado num dispositivo Android real ou no emulador.');
+    return;
+  }
+
+  try {
+    if (overlayActive) {
+      const response = await GigUPlugin.stopOverlay();
+      if (response && response.status === 'stopped') {
+        setOverlayActive(false);
+      }
+    } else {
+      const response = await GigUPlugin.startOverlay();
+      if (response && response.status === 'permission_needed') {
+        alert('Por favor, conceda a permissão de "Sobreposição sobre outras aplicações" nas definições do sistema.');
+      } else if (response && response.status === 'started') {
+        setOverlayActive(true);
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao comunicar com o GigUPlugin:', error);
+  }
+};
 
 const EXAMPLE_TEXT = "5 min\n2 km\n9 min\n5,2 km\nR$ 1,9/km ~2 km\nR$ 14\nAceitar por R$ 14\nSugira sua tarifa\nR$ 15,50 R$ 17 R$ 18,50";
 
@@ -113,11 +145,25 @@ export default function App() {
   const warnings = useMemo(() => settingsWarnings(settings), [settings]);
   const counter = useMemo(() => calculateCounterOffer(offer, settings), [offer, settings]);
 
+  // Alterna o estado do Orb utilizando a ponte nativa do GigUPlugin
   const handleToggleOverlay = async () => {
-    const newState = !overlayActive;
-    const success = await toggleGigUOverlay(newState);
-    if (success) {
-      setOverlayActive(newState);
+    try {
+      if (overlayActive) {
+        const response = await GigUPlugin.stopOverlay();
+        if (response && response.status === 'stopped') {
+          setOverlayActive(false);
+        }
+      } else {
+        const response = await GigUPlugin.startOverlay();
+        if (response && response.status === 'permission_needed') {
+          alert('Por favor, conceda a permissão de "Sobreposição sobre outros aplicativos" na tela de configurações que foi aberta.');
+        } else if (response && response.status === 'started') {
+          setOverlayActive(true);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao comunicar com o GigUPlugin:', error);
+      alert('Não foi possível acionar o Orb. Verifique se o app está sendo executado em um dispositivo Android com o plugin instalado.');
     }
   };
 

@@ -6,7 +6,7 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        registerPlugin(GigUOverlayPlugin.class);
+        registerPlugin(GigUPlugin.class);
         super.onCreate(savedInstanceState);
     }
 }
