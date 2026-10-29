@@ -4,4 +4,5 @@
     <string name="title_activity_main">GigU Copiloto</string>
     <string name="package_name">com.alexsilvak.gigu</string>
     <string name="custom_url_scheme">com.alexsilvak.gigu</string>
+    <string name="accessibility_description">Monitoramento automático de corridas do GigU Copiloto.</string>
 </resources>

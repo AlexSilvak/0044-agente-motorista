@@ -36,9 +36,9 @@ import java.util.regex.Pattern;
 public class GigUOverlayService extends Service implements TextToSpeech.OnInitListener {
     private static final String TAG = "GigUOverlayService";
     private static final String CHANNEL_ID = "gigu_overlay_channel";
-    
+
     // Custo estimado do veículo por KM (combustível + manutenção)
-    private static final double CUSTO_POR_KM = 0.70; 
+    private static final double CUSTO_POR_KM = 0.70;
 
     // Opções de Automação (podem ser alteradas via preferências)
     private boolean notificacaoTextoHabilitada = true;
@@ -135,7 +135,8 @@ public class GigUOverlayService extends Service implements TextToSpeech.OnInitLi
 
     private void iniciarMonitoramentoDownloads() {
         final File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        if (!downloadDir.exists()) return;
+        if (!downloadDir.exists())
+            return;
 
         int mask = FileObserver.CLOSE_WRITE;
 
@@ -159,14 +160,16 @@ public class GigUOverlayService extends Service implements TextToSpeech.OnInitLi
     }
 
     private void processarNovoArquivo(File diretorio, String nomeArquivo) {
-        if (nomeArquivo == null || nomeArquivo.isEmpty()) return;
+        if (nomeArquivo == null || nomeArquivo.isEmpty())
+            return;
 
         String nomeLower = nomeArquivo.toLowerCase();
         boolean eImagem = nomeLower.endsWith(".jpg") || nomeLower.endsWith(".jpeg") || nomeLower.endsWith(".png");
 
         if (eImagem && !nomeArquivo.contains("_lido")) {
             File arquivoOriginal = new File(diretorio, nomeArquivo);
-            if (!arquivoOriginal.exists()) return;
+            if (!arquivoOriginal.exists())
+                return;
 
             int dotIndex = nomeArquivo.lastIndexOf('.');
             String nomeSemExtensao = (dotIndex == -1) ? nomeArquivo : nomeArquivo.substring(0, dotIndex);
@@ -186,68 +189,68 @@ public class GigUOverlayService extends Service implements TextToSpeech.OnInitLi
             InputImage image = InputImage.fromFilePath(this, Uri.fromFile(arquivoOriginal));
 
             textRecognizer.process(image)
-                .addOnSuccessListener(visionText -> {
-                    String textoCompleto = visionText.getText();
+                    .addOnSuccessListener(visionText -> {
+                        String textoCompleto = visionText.getText();
 
-                    // Extração de métricas
-                    double valor = extrairValor(textoCompleto);
-                    double km = extrairKm(textoCompleto);
-                    int minutos = extrairMinutos(textoCompleto);
-                    double nota = extrairNota(textoCompleto);
+                        // Extração de métricas
+                        double valor = extrairValor(textoCompleto);
+                        double km = extrairKm(textoCompleto);
+                        int minutos = extrairMinutos(textoCompleto);
+                        double nota = extrairNota(textoCompleto);
 
-                    // Cálculos de Rentabilidade
-                    double valorPorKm = (km > 0) ? (valor / km) : 0.0;
-                    double valorPorHora = (minutos > 0) ? (valor / (minutos / 60.0)) : 0.0;
-                    double custoEstimado = km * CUSTO_POR_KM;
-                    double lucroR$ = valor - custoEstimado;
-                    double percentualLucro = (valor > 0) ? (lucroR$ / valor) * 100.0 : 0.0;
+                        // Cálculos de Rentabilidade
+                        double valorPorKm = (km > 0) ? (valor / km) : 0.0;
+                        double valorPorHora = (minutos > 0) ? (valor / (minutos / 60.0)) : 0.0;
+                        double custoEstimado = km * CUSTO_POR_KM;
+                        double lucroR$ = valor - custoEstimado;
+                        double percentualLucro = (valor > 0) ? (lucroR$ / valor) * 100.0 : 0.0;
 
-                    // 1. Atualizar HUD / Card no Orb
-                    if (orbWebView != null) {
-                        String scriptJs = String.format(Locale.US,
-                            "setResult({valor: %.2f, km: %.2f, min: %d, valKm: %.2f, valHora: %.2f, lucroPct: %.1f, nota: %.2f})",
-                            valor, km, minutos, valorPorKm, valorPorHora, percentualLucro, nota);
-                        orbWebView.post(() -> orbWebView.evaluateJavascript(scriptJs, null));
-                    }
+                        // 1. Atualizar HUD / Card no Orb
+                        if (orbWebView != null) {
+                            String scriptJs = String.format(Locale.US,
+                                    "setResult({valor: %.2f, km: %.2f, min: %d, valKm: %.2f, valHora: %.2f, lucroPct: %.1f, nota: %.2f})",
+                                    valor, km, minutos, valorPorKm, valorPorHora, percentualLucro, nota);
+                            orbWebView.post(() -> orbWebView.evaluateJavascript(scriptJs, null));
+                        }
 
-                    // 2. Notificação de Voz
-                    if (notificacaoVozHabilitada && tts != null) {
-                        String fala = String.format(Locale.getDefault(), 
-                            "Corrida de %.2f reais. %.2f reais por quilômetro. Lucro de %.0f por cento.", 
-                            valor, valorPorKm, percentualLucro);
-                        tts.speak(fala, TextToSpeech.QUEUE_FLUSH, null, "GIGU_TTS");
-                    }
+                        // 2. Notificação de Voz
+                        if (notificacaoVozHabilitada && tts != null) {
+                            String fala = String.format(Locale.getDefault(),
+                                    "Corrida de %.2f reais. %.2f reais por quilômetro. Lucro de %.0f por cento.",
+                                    valor, valorPorKm, percentualLucro);
+                            tts.speak(fala, TextToSpeech.QUEUE_FLUSH, null, "GIGU_TTS");
+                        }
 
-                    // 3. Notificação de Texto no Sistema
-                    if (notificacaoTextoHabilitada) {
-                        exibirNotificacaoCorrida(valor, valorPorKm, valorPorHora, percentualLucro, nota);
-                    }
+                        // 3. Notificação de Texto no Sistema
+                        if (notificacaoTextoHabilitada) {
+                            exibirNotificacaoCorrida(valor, valorPorKm, valorPorHora, percentualLucro, nota);
+                        }
 
-                    // 4. Copiar Mensagem Padrão para Área de Transferência
-                    if (mensagemPassageiroHabilitada) {
-                        copiarMensagemPassageiro();
-                    }
+                        // 4. Copiar Mensagem Padrão para Área de Transferência
+                        if (mensagemPassageiroHabilitada) {
+                            copiarMensagemPassageiro();
+                        }
 
-                    // Transmitir Broadcast para o React / App
-                    Intent intent = new Intent("GIGU_CORRIDA_CALCULADA");
-                    intent.putExtra("VALOR", valor);
-                    intent.putExtra("KM", km);
-                    intent.putExtra("MINUTOS", minutos);
-                    intent.putExtra("VALOR_POR_KM", valorPorKm);
-                    intent.putExtra("VALOR_POR_HORA", valorPorHora);
-                    intent.putExtra("PERCENTUAL_LUCRO", percentualLucro);
-                    intent.putExtra("NOTA", nota);
-                    sendBroadcast(intent);
+                        // Transmitir Broadcast para o React / App
+                        Intent intent = new Intent("GIGU_CORRIDA_CALCULADA");
+                        intent.putExtra("VALOR", valor);
+                        intent.putExtra("KM", km);
+                        intent.putExtra("MINUTOS", minutos);
+                        intent.putExtra("VALOR_POR_KM", valorPorKm);
+                        intent.putExtra("VALOR_POR_HORA", valorPorHora);
+                        intent.putExtra("PERCENTUAL_LUCRO", percentualLucro);
+                        intent.putExtra("NOTA", nota);
+                        sendBroadcast(intent);
 
-                    arquivoOriginal.renameTo(arquivoDestino);
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Falha no OCR", e);
-                    if (orbWebView != null) {
-                        orbWebView.post(() -> orbWebView.evaluateJavascript("setStatus('error')", null));
-                    }
-                    arquivoOriginal.renameTo(arquivoDestino);
-                });
+                        arquivoOriginal.renameTo(arquivoDestino);
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Falha no OCR", e);
+                        if (orbWebView != null) {
+                            orbWebView.post(() -> orbWebView.evaluateJavascript("setStatus('error')", null));
+                        }
+                        arquivoOriginal.renameTo(arquivoDestino);
+                    });
 
         } catch (Exception e) {
             Log.e(TAG, "Erro ao carregar imagem", e);
@@ -260,7 +263,10 @@ public class GigUOverlayService extends Service implements TextToSpeech.OnInitLi
         Matcher matcher = pattern.matcher(texto);
         if (matcher.find()) {
             String valStr = matcher.group(1).replace(",", ".");
-            try { return Double.parseDouble(valStr); } catch (Exception ignored) {}
+            try {
+                return Double.parseDouble(valStr);
+            } catch (Exception ignored) {
+            }
         }
         return 0.0;
     }
@@ -270,7 +276,10 @@ public class GigUOverlayService extends Service implements TextToSpeech.OnInitLi
         Matcher matcher = pattern.matcher(texto);
         if (matcher.find()) {
             String kmStr = matcher.group(1).replace(",", ".");
-            try { return Double.parseDouble(kmStr); } catch (Exception ignored) {}
+            try {
+                return Double.parseDouble(kmStr);
+            } catch (Exception ignored) {
+            }
         }
         return 0.0;
     }
@@ -279,7 +288,10 @@ public class GigUOverlayService extends Service implements TextToSpeech.OnInitLi
         Pattern pattern = Pattern.compile("(\\d+)\\s?min", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(texto);
         if (matcher.find()) {
-            try { return Integer.parseInt(matcher.group(1)); } catch (Exception ignored) {}
+            try {
+                return Integer.parseInt(matcher.group(1));
+            } catch (Exception ignored) {
+            }
         }
         return 0;
     }
@@ -289,7 +301,10 @@ public class GigUOverlayService extends Service implements TextToSpeech.OnInitLi
         Matcher matcher = pattern.matcher(texto);
         if (matcher.find()) {
             String notaStr = matcher.group(1).replace(",", ".");
-            try { return Double.parseDouble(notaStr); } catch (Exception ignored) {}
+            try {
+                return Double.parseDouble(notaStr);
+            } catch (Exception ignored) {
+            }
         }
         return 5.0; // Padrão
     }
@@ -297,7 +312,8 @@ public class GigUOverlayService extends Service implements TextToSpeech.OnInitLi
     private void exibirNotificacaoCorrida(double valor, double valKm, double valHora, double lucroPct, double nota) {
         NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         String titulo = String.format(Locale.getDefault(), "R$ %.2f | R$ %.2f/km", valor, valKm);
-        String conteudo = String.format(Locale.getDefault(), "R$/Hora: R$ %.2f | Lucro: %.0f%% | Nota: %.2f", valHora, lucroPct, nota);
+        String conteudo = String.format(Locale.getDefault(), "R$/Hora: R$ %.2f | Lucro: %.0f%% | Nota: %.2f", valHora,
+                lucroPct, nota);
 
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(titulo)
@@ -312,7 +328,8 @@ public class GigUOverlayService extends Service implements TextToSpeech.OnInitLi
 
     private void copiarMensagemPassageiro() {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("GigU Msg", "Olá! Sou seu motorista GigU e já estou a caminho do seu local de embarque.");
+        ClipData clip = ClipData.newPlainText("GigU Msg",
+                "Olá! Sou seu motorista GigU e já estou a caminho do seu local de embarque.");
         if (clipboard != null) {
             clipboard.setPrimaryClip(clip);
         }
@@ -346,11 +363,63 @@ public class GigUOverlayService extends Service implements TextToSpeech.OnInitLi
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (downloadObserver != null) downloadObserver.stopWatching();
-        if (textRecognizer != null) textRecognizer.close();
-        if (tts != null) { tts.stop(); tts.shutdown(); }
+        if (downloadObserver != null)
+            downloadObserver.stopWatching();
+        if (textRecognizer != null)
+            textRecognizer.close();
+        if (tts != null) {
+            tts.stop();
+            tts.shutdown();
+        }
         if (orbWebView != null && windowManager != null) {
             windowManager.removeView(orbWebView);
+        }
+    }
+
+    private BroadcastReceiver autoDetectionReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if ("GIGU_AUTO_DETECT_RIDE".equals(intent.getAction())) {
+                String textoExtraido = intent.getStringExtra("TEXTO_TELA");
+                if (textoExtraido != null) {
+                    // Executa os cálculos instantaneamente sem precisar de print/OCR
+                    processarTextoCorrida(textoExtraido);
+                }
+            }
+        }
+    };
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        // Registra o receiver
+        IntentFilter filter = new IntentFilter("GIGU_AUTO_DETECT_RIDE");
+        registerReceiver(autoDetectionReceiver, filter);
+    }
+
+    private void processarTextoCorrida(String texto) {
+        double valor = extrairValor(texto);
+        double km = extrairKm(texto);
+        int minutos = extrairMinutos(texto);
+
+        double valorPorKm = (km > 0) ? (valor / km) : 0.0;
+        double valorPorHora = (minutos > 0) ? (valor / (minutos / 60.0)) : 0.0;
+        double lucroPct = (valor > 0) ? ((valor - (km * 0.70)) / valor) * 100.0 : 0.0;
+
+        // Atualiza a barra flutuante estilo Gemini em tempo real
+        if (orbWebView != null) {
+            String scriptJs = String.format(Locale.US,
+                    "setResult({valKm: %.2f, valHora: %.2f, lucroPct: %.1f})",
+                    valorPorKm, valorPorHora, lucroPct);
+            orbWebView.post(() -> orbWebView.evaluateJavascript(scriptJs, null));
+        }
+
+        // Anuncia por voz automaticamente
+        if (tts != null) {
+            String respostaVoz = String.format(Locale.getDefault(),
+                    "Corrida de %.2f reais por quilômetro. Lucro de %.0f por cento.",
+                    valorPorKm, lucroPct);
+            tts.speak(respostaVoz, TextToSpeech.QUEUE_FLUSH, null, "GIGU_AUTO_TTS");
         }
     }
 }

@@ -1,10 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permissões necessárias -->
+    <!-- Permissões de Sistema e Serviços -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <!-- Permissões de Armazenamento -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
@@ -33,12 +33,29 @@
             </intent-filter>
         </activity>
 
-        <!-- Serviço do Orb Flutuante -->
+        <!-- 1. Serviço do Overlay Flutuante / Pílula estilo Gemini -->
         <service 
-            android:name="com.alexsilvak.gigu.GigUOverlayService"
+            android:name=".GigUOverlayService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="mediaProjection" />
+            android:foregroundServiceType="specialUse">
+            <property 
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" 
+                android:value="Overlay de cálculo de rentabilidade em tempo real" />
+        </service>
+
+        <!-- 2. Serviço de Acessibilidade (Monitorização Automática de Corridas) -->
+        <service
+            android:name=".GigUAccessibilityService"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+        </service>
 
     </application>
 </manifest>
